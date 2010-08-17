@@ -52,6 +52,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.settings.activities.ColorPickerDialog;
 
 /**
  * Gesture lock pattern settings.
@@ -75,6 +76,7 @@ public class SecuritySettings extends PreferenceActivity {
     private static final String KEY_SHOW_ERROR_PATH = "showerrorpath";
     private static final String KEY_SHOW_CUSTOM_MSG = "showcustommsg";
     private static final String KEY_CUSTOM_MSG = "custommsg";
+    private static final String KEY_CUSTOM_MSG_COLOR = "custommsg_color";
     private static final String KEY_SHOW_UNLOCK_MSG = "showunlockmsg";
     private static final String KEY_SHOW_UNLOCK_ERR_MSG = "showunlockerrmsg";
 
@@ -87,6 +89,7 @@ public class SecuritySettings extends PreferenceActivity {
     private CheckBoxPreference mShowErrorPath;
     private CheckBoxPreference mShowCustomMsg;
     private EditTextPreference mCustomMsg;
+    private Preference mCustomMsgColor;    
     private CheckBoxPreference mShowUnlockMsg;
     private CheckBoxPreference mShowUnlockErrMsg;
     private ListPreference mIncorrectDelay;
@@ -186,7 +189,8 @@ public class SecuritySettings extends PreferenceActivity {
         mVisibleDots = (CheckBoxPreference) pm.findPreference(KEY_VISIBLE_DOTS);
         mShowErrorPath = (CheckBoxPreference) pm.findPreference(KEY_SHOW_ERROR_PATH);
         mShowCustomMsg = (CheckBoxPreference) pm.findPreference(KEY_SHOW_CUSTOM_MSG);        
-        mCustomMsg = (EditTextPreference) pm.findPreference(KEY_CUSTOM_MSG);        
+        mCustomMsg = (EditTextPreference) pm.findPreference(KEY_CUSTOM_MSG);       
+        mCustomMsgColor = pm.findPreference(KEY_CUSTOM_MSG_COLOR); 
         mShowUnlockMsg = (CheckBoxPreference) pm.findPreference(KEY_SHOW_UNLOCK_MSG);        
         mShowUnlockErrMsg = (CheckBoxPreference) pm.findPreference(KEY_SHOW_UNLOCK_ERR_MSG);        
         mIncorrectDelay = (ListPreference) pm.findPreference(KEY_INCORRECT_DELAY);
@@ -329,6 +333,9 @@ public class SecuritySettings extends PreferenceActivity {
             lockPatternUtils.setShowUnlockErrMsg(isToggled(preference));
         } else if (KEY_SHOW_CUSTOM_MSG.equals(key)) {
             lockPatternUtils.setShowCustomMsg(isToggled(preference));            
+        } else if (preference == mCustomMsgColor) {
+            ColorPickerDialog cp = new ColorPickerDialog(this, mCustomMsgColorListener, lockPatternUtils.getCustomMsgColor());
+            cp.show();
         } else if (KEY_TACTILE_FEEDBACK_ENABLED.equals(key)) {
             lockPatternUtils.setTactileFeedbackEnabled(isToggled(preference));
         } else if (preference == mShowPassword) {
@@ -356,6 +363,16 @@ public class SecuritySettings extends PreferenceActivity {
 
         return false;
     }
+    
+    ColorPickerDialog.OnColorChangedListener mCustomMsgColorListener = 
+        new ColorPickerDialog.OnColorChangedListener() {
+            public void colorChanged(int color) {
+                final LockPatternUtils lockPatternUtils = mChooseLockSettingsHelper.utils();            
+                lockPatternUtils.setCustomMsgColor(color);
+            }
+            public void colorUpdate(int color) {
+            }
+    };
 
     /*
      * Creates toggles for each available location provider
